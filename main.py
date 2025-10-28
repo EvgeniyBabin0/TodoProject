@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 class Task:
@@ -9,6 +10,10 @@ class Task:
     def mark_completed(self):
         self.completed = True
 
+    def __repr__(self):
+        status = "✓" if self.completed else "✗"
+        return f"Task(title={self.title!r}, completed={status})"
+
 
 class TodoList:
     def __init__(self):
@@ -17,9 +22,17 @@ class TodoList:
     def add_task(self, title: str):
         self.tasks.append(Task(title))
 
-    def complete_task(self, index: int):
+    def complete_task(self, index: int) -> bool:
         if 0 <= index < len(self.tasks):
             self.tasks[index].mark_completed()
+            return True
+        return False
+
+    def remove_task(self, index: int) -> bool:
+        if 0 <= index < len(self.tasks):
+            del self.tasks[index]
+            return True
+        return False
 
     def get_all(self):
         return self.tasks
@@ -27,9 +40,27 @@ class TodoList:
     def get_incomplete(self):
         return [t for t in self.tasks if not t.completed]
 
+    def save_tasks(self, filename: str):
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(
+                [{'title': t.title, 'completed': t.completed} for t in self.tasks],
+                f,
+                ensure_ascii=False,
+                indent=2
+            )
+
+    def load_tasks(self, filename: str):
+        try:
+            with open(filename, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                self.tasks = [Task(item['title']) for item in data]
+                for t, item in zip(self.tasks, data):
+                    t.completed = item['completed']
+        except FileNotFoundError:
+            self.tasks = []
 
 
-if __name__ == "__main__":
+def main():
     todo_list = TodoList()
     todo_list.add_task("Написать отчёт")
     todo_list.add_task("Купить продукты")
@@ -43,9 +74,9 @@ if __name__ == "__main__":
     todo_list.add_task("Поздравить друга с днём рождения")
 
     # Отмечаем как выполненные несколько задач
-    todo_list.complete_task(1)  # "Купить продукты"
-    todo_list.complete_task(4)  # "Прочитать главу учебника"
-    todo_list.complete_task(7)  # "Забрать посылку с почты"
+    todo_list.complete_task(1)
+    todo_list.complete_task(4)
+    todo_list.complete_task(7)
 
     print("Все задачи:")
     for t in todo_list.get_all():
@@ -54,3 +85,9 @@ if __name__ == "__main__":
     print("\nНевыполненные задачи:")
     for t in todo_list.get_incomplete():
         print(f"- {t.title}")
+
+    todo_list.save_tasks("tasks.json")
+
+
+if __name__ == "__main__":
+    main()
