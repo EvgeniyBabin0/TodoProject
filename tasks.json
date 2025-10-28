@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Написать отчёт",
+    "completed": false
+  },
+  {
+    "title": "Купить продукты",
+    "completed": true
+  },
+  {
+    "title": "Позвонить врачу",
+    "completed": false
+  },
+  {
+    "title": "Сделать домашнее задание",
+    "completed": false
+  },
+  {
+    "title": "Прочитать главу учебника",
+    "completed": true
+  },
+  {
+    "title": "Сходить в спортзал",
+    "completed": false
+  },
+  {
+    "title": "Подготовить презентацию",
+    "completed": false
+  },
+  {
+    "title": "Забрать посылку с почты",
+    "completed": true
+  },
+  {
+    "title": "Оплатить квитанции",
+    "completed": false
+  },
+  {
+    "title": "Поздравить друга с днём рождения",
+    "completed": false
+  }
+]

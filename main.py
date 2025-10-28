@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+
 class Task:
     def __init__(self, title: str):
         self.title = title
@@ -51,13 +52,13 @@ class TodoList:
 
     def load_tasks(self, filename: str):
         try:
-            with open(filename, 'r', encoding='utf-8') as f:
+            with open(filename, encoding='utf-8') as f:
                 data = json.load(f)
                 self.tasks = [Task(item['title']) for item in data]
-                for t, item in zip(self.tasks, data):
+                for t, item in zip(self.tasks, data, strict=True):
                     t.completed = item['completed']
         except FileNotFoundError:
-            self.tasks = []
+            self.tasks = []  # Обнуляем список, если файла нет
 
 
 def main():
@@ -73,7 +74,6 @@ def main():
     todo_list.add_task("Оплатить квитанции")
     todo_list.add_task("Поздравить друга с днём рождения")
 
-    # Отмечаем как выполненные несколько задач
     todo_list.complete_task(1)
     todo_list.complete_task(4)
     todo_list.complete_task(7)
