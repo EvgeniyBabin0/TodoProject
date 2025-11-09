@@ -1,38 +1,46 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from database import create_task, delete_task, get_all_tasks, get_task, update_task
+
 app = FastAPI()
 
-class Task(BaseModel):
-    id: int
+class TaskIn(BaseModel):
     title: str
-    completed: bool | None = False
+    completed: bool = False
 
-tasks: list[Task] = []
+class TaskOut(TaskIn):
+    id: str
 
-@app.get("/tasks", response_model=list[Task])
-def get_tasks():
+@app.get("/tasks", response_model=list[TaskOut])
+def api_get_tasks():
+    tasks = get_all_tasks()
     return tasks
 
-@app.post("/tasks", response_model=Task)
-def create_task(task: Task):
-    if any(t.id == task.id for t in tasks):
-        raise HTTPException(status_code=400, detail="Task with this id already exists")
-    tasks.append(task)
+@app.get("/tasks/{task_id}", response_model=TaskOut)
+def api_get_task(task_id: str):
+    task = get_task(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
     return task
 
-@app.put("/tasks/{task_id}", response_model=Task)
-def update_task(task_id: int, updated_task: Task):
-    for i, t in enumerate(tasks):
-        if t.id == task_id:
-            tasks[i] = updated_task
-            return updated_task
-    raise HTTPException(status_code=404, detail="Task not found")
+@app.post("/tasks", response_model=TaskOut)
+def api_create_task(task: TaskIn):
+    task_dict = task.model_dump()
+    new_task = create_task(task_dict)
+    return new_task
+
+@app.put("/tasks/{task_id}", response_model=TaskOut)
+def api_update_task(task_id: str, task: TaskIn):
+    updated = update_task(task_id, task.model_dump())
+    if not updated:
+        raise HTTPException(status_code=404, detail="Task not found")
+    updated_task = get_task(task_id)
+    return updated_task
 
 @app.delete("/tasks/{task_id}")
-def delete_task(task_id: int):
-    for i, t in enumerate(tasks):
-        if t.id == task_id:
-            tasks.pop(i)
-            return {"message": "Task deleted"}
-    raise HTTPException(status_code=404, detail="Task not found")
+def api_delete_task(task_id: str):
+    deleted = delete_task(task_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"message": "Task deleted"}
